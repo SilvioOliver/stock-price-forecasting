@@ -1,178 +1,66 @@
-# 📈 Projeto 8 — Inteligência Financeira
-### Prevendo Preços de Ativos em Tempo Real
+# Stock Price Forecasting | Inteligência Financeira
 
-> **Silvio Oliver**
+Aplicação educacional para consultar histórico de ativos, calcular indicadores técnicos e gerar projeções demonstrativas de preço usando Python, Pandas, Streamlit e Scikit-learn.
 
----
+## Funcionalidades
 
-## 📌 Visão Geral
+- Coleta de histórico via Yahoo Finance (`yfinance`).
+- Indicadores RSI, MACD, Bandas de Bollinger, SMA e EMA.
+- Validação básica de qualidade: colunas obrigatórias, datas duplicadas, preços nulos ou inválidos e volume mínimo de histórico.
+- Projeção recursiva de curto prazo com regressão linear.
+- Avaliação em conjunto temporal separado, com MAE e R².
+- Testes automatizados e workflow de CI no GitHub Actions.
 
-Aplicação interativa construída com **Streamlit** que permite ao usuário:
+## Arquitetura
 
-- Selecionar ações de grandes empresas (Apple, Google, Microsoft, Tesla, Netflix, Meta)
-- Definir o período histórico de análise
-- Visualizar **indicadores técnicos** em gráficos interativos
-- Gerar **previsões de preço** via Regressão Linear com Machine Learning
-
----
-
-## 🗂️ Estrutura do Projeto
-
-```
-Projeto8_InteligenciaFinanceira/
-│
-├── app.py                          # Aplicação Streamlit (interface web)
-├── InteligenciaFinanceira_v2.ipynb # Notebook com análise e desenvolvimento
-├── README.md                       # Este arquivo
-└── requirements.txt                # Dependências do projeto
+```text
+app.py
+src/
+  ingestion/       # Extração dos dados de mercado
+  transformation/  # Cálculo dos indicadores
+  quality/         # Regras de validação
+  forecasting/    # Treino, avaliação e projeção
+tests/              # Testes automatizados
+.github/workflows/  # Integração contínua
 ```
 
----
+## Executar localmente
 
-## ⚙️ Instalação e Execução
-
-### 1. Pré-requisitos
-
-- Python 3.8 ou superior
-- pip atualizado
-
-### 2. Instalar as dependências
+Requisitos: Python 3.10 ou superior.
 
 ```bash
+python -m venv .venv
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+# Linux/macOS
+source .venv/bin/activate
+
 pip install -r requirements.txt
-```
-
-Ou instale manualmente:
-
-```bash
-pip install streamlit yfinance ta scikit-learn pandas matplotlib
-```
-
-### 3. Executar a aplicação
-
-```bash
 streamlit run app.py
 ```
 
-A aplicação abrirá automaticamente no navegador em `http://localhost:8501`.
+## Executar testes
 
----
-
-## 🔧 Dependências
-
-| Pacote | Versão mínima | Finalidade |
-|--------|--------------|------------|
-| `streamlit` | 1.28+ | Framework da aplicação web interativa |
-| `yfinance` | 0.2+ | Download de dados históricos via Yahoo Finance |
-| `ta` | 0.10+ | Cálculo de indicadores técnicos financeiros |
-| `scikit-learn` | 1.3+ | Pipeline de Machine Learning |
-| `pandas` | 2.0+ | Manipulação e análise de dados |
-| `matplotlib` | 3.7+ | Visualizações estáticas |
-
----
-
-## 📊 Funcionalidades
-
-### 🔍 Visualizar Gráficos — Indicadores Técnicos
-
-| Indicador | Descrição |
-|-----------|-----------|
-| **Preço de Fechamento** | Histórico do preço de fechamento do ativo |
-| **Bandas de Bollinger** | Volatilidade — identifica sobrecompra/sobrevenda |
-| **MACD** | Tendência — cruzamento de médias móveis exponenciais |
-| **RSI** | Força relativa — zonas de 30 (sobrevenda) e 70 (sobrecompra) |
-| **SMA** | Média Móvel Simples de 14 períodos |
-| **EMA** | Média Móvel Exponencial — mais reativa a mudanças recentes |
-
-### 📋 Visualizar Tabela de Dados
-
-Exibe os **20 últimos registros** do ativo selecionado com todas as colunas disponíveis.
-
-### 🤖 Fazer Previsões
-
-- Insira o número de dias para a previsão
-- O modelo treina uma **Regressão Linear** com padronização (StandardScaler)
-- Exibe o **R²** (acurácia) e os preços previstos dia a dia
-
----
-
-## 🧠 Como o Modelo de Previsão Funciona
-
-```
-Dados históricos (Close)
-        │
-        ▼
-Shift temporal → cria variável-alvo (preço N dias à frente)
-        │
-        ▼
-Train/Test Split (80% treino / 20% teste)
-        │
-        ▼
-StandardScaler (fit apenas no treino → evita data leakage)
-        │
-        ▼
-LinearRegression.fit(x_treino, y_treino)
-        │
-        ▼
-Métricas: R² e MAE no conjunto de teste
-        │
-        ▼
-Previsão dos próximos N dias com os últimos dados disponíveis
+```bash
+pytest -q
 ```
 
-> ⚠️ **Aviso:** Este modelo é para fins educacionais. Regressão Linear não captura
-> padrões não-lineares de séries temporais financeiras. Não constitui recomendação
-> de investimento.
+## Fluxo de dados
 
----
+1. O usuário seleciona o ativo e o intervalo.
+2. O módulo de ingestão consulta o Yahoo Finance.
+3. As validações verificam estrutura e consistência mínima.
+4. O módulo de transformação calcula indicadores técnicos.
+5. A interface exibe os dados ou chama o módulo de previsão.
 
-## 📁 Empresas e Tickers Disponíveis
+## Limitações
 
-| Empresa | Ticker |
-|---------|--------|
-| Apple | `AAPL` |
-| Google | `GOOG` |
-| Microsoft | `MSFT` |
-| Tesla | `TSLA` |
-| Netflix | `NFLX` |
-| Meta | `META` |
+- O Yahoo Finance é uma fonte externa e pode limitar, atrasar ou alterar respostas.
+- A regressão linear é um exemplo didático, não um modelo robusto de investimento.
+- O conjunto de teste respeita a ordem temporal; ainda assim, resultados históricos não garantem desempenho futuro.
+- A previsão recursiva acumula erro a cada passo.
+- Não há, nesta versão, persistência em S3, orquestração AWS ou consultas Athena. Esses componentes podem ser adicionados em uma evolução posterior, se implementados e testados.
 
-Para adicionar novos ativos, edite o bloco de seleção em `app.py` e adicione o ticker
-correspondente. Todos os tickers disponíveis podem ser consultados em:
-[Yahoo Finance — Most Active](https://finance.yahoo.com/markets/stocks/most-active/)
+## Aviso
 
----
-
-## 🐛 Problemas Conhecidos e Soluções
-
-| Problema | Causa | Solução |
-|----------|-------|---------|
-| `ValueError: No data returned` | Ticker inválido ou mercado fechado | Verifique o ticker no Yahoo Finance |
-| Gráfico MACD não renderiza | `matplotlib` não instalado | `pip install matplotlib` |
-| `SettingWithCopyWarning` | Modificação de slice sem `.copy()` | Use sempre `df.copy()` |
-| Previsão com R² muito baixo | Poucos dados de treino | Aumente o número de registros na sidebar |
-
----
-
-## 🚀 Evoluções Futuras
-
-- [ ] Substituir Regressão Linear por **LSTM** (Keras/TensorFlow) para melhor captura de dependências temporais
-- [ ] Adicionar modelo **Prophet** (Meta) para previsões de séries temporais
-- [ ] Incorporar mais features: Volume, indicadores combinados, **sentiment** de notícias
-- [ ] Expandir o universo de ativos: BDRs, criptomoedas, índices (IBOVESPA, S&P 500)
-- [ ] Criar sistema de **alertas automáticos** quando RSI > 70 ou < 30
-- [ ] Adicionar suporte a **múltiplos idiomas** (PT/EN)
-
----
-
-## 📚 Referências
-
-- [Documentação yfinance](https://ranaroussi.github.io/yfinance/)
-- [Documentação ta (Technical Analysis Library)](https://technical-analysis-library-in-python.readthedocs.io/)
-- [Documentação Streamlit](https://docs.streamlit.io/)
-- [Documentação scikit-learn](https://scikit-learn.org/stable/)
-- [Yahoo Finance — Tickers](https://finance.yahoo.com/markets/stocks/most-active/)
-
----
-
-*Nerd dos Dados — Método TCD | Projeto 8*
+Este projeto tem finalidade educacional e não constitui recomendação de investimento.
